@@ -4,16 +4,16 @@
 
 ## OLD PITHOS
 
-* Code is not maintained
-* Last feature 2013 (?)
+* Last feature 2012
 * Mixed html + java
+* Code is not maintained
 * Much effort to change something
-* Old html (table design)
+* Old html markup (table design)
 
 ---
 
 ## NEW PITHOS 
-
+(??)
 > Pithos is a javascript web application taking advantage 
 > of Pithos API inside a Django project
 
@@ -21,57 +21,57 @@
 
 ## NEW PITHOS
 
-* Ember.js main js framework
+* Django (??)
+* Ember.js
 * Ember data
-* Foundation zurb for style
-* Django (ask kpap why!)
+* Foundation
 
 ---
 
 ## TECHNOLOGIES
 
-* javascript, es6
-* node js
-* python
+* JavaScript, ES6
+* node.js
+* Python
 * sass
 
 ---
 
 ## FRAMEWORKS
 
-* Ember
-* qunit
+* Ember.js
 * Django
-* Foundation
+* Foundation Zurb
 * Ember data
+* Qunit
 
 ---
 
 ## LIBRARIES
 
-* handlebars
-* underscore
-* icon library: font awesome
+* Handlebars
+* Underscore
+* Font Awesome
 
 ---
 
 
 ## TOOLS
 
-* compass
 * npm
 * bower
-* ember cli
-* Ember chrome inspector
+* compass
 * broccoli
 * watchman
-* js compiler: babel
+* Ember chrome inspector
+* babel
+* Ember cli
 
 ---
 <!-- .slide: data-background-class="ember" -->
 ## EMBER.JS
 
-> A framework for creating ambitious web applications.
+> A Javascript MVC framework for creating ambitious web applications.
 
 
 ---
@@ -81,12 +81,12 @@
 
 #### Core concepts
 
-- Templates <!-- .element: class="fragment" data-fragment-index="1" -->
-- Components <!-- .element: class="fragment" data-fragment-index="2" -->
-- Controllers <!-- .element: class="fragment" data-fragment-index="3" -->
-- Models <!-- .element: class="fragment" data-fragment-index="4" -->
-- Routes <!-- .element: class="fragment" data-fragment-index="5" -->
-- The router <!-- .element: class="fragment" data-fragment-index="6" -->
+- Templates
+- Component
+- Controller
+- Model
+- Route
+- The route
 
 ---
 <!-- .slide: data-background-class="ember" -->
@@ -126,3 +126,129 @@ App.GravatarImageComponent = Ember.Component.extend({
 });
 ```
 
+---
+
+## Development needs
+
+- compile
+- watch
+- install, manage and track packages/dependencies
+- concat, minify
+- precommit hooks
+- check/ control coding style (jshint, k auto t sass)
+- other tasks/script (destination/paste of output)
+- asset pipeline (??)
+
+---
+
+## Difficulties
+
+1. API not following conventions [http://jsonapi.org/format/](jsonapi format)
+2. Objects vs human friendly folder structure
+3. Error handling
+
+---
+
+## Difficulties
+
+3. API not following conventions [http://jsonapi.org/format/](jsonapi format)
+
+
+```javascript
+// Ember way
+var groups = this.store.find('groups');
+
+// Pithos API way
+ajaxSuccess: function(jqXHR, jsonPayload) {
+        // get all headers as a string
+        var headersStr = jqXHR.getAllResponseHeaders();
+        var headers = headersStr.split('\n');
+
+        // removes the colon and the uuids of the members of each group
+        var re = (/X-Account-Group-\S*(?=:)/g);
+
+        var groupHeader, groupName, groups=[];
+
+        if(headersStr.indexOf('X-Account-Group-') > -1) {
+            headers.forEach(function(h) {
+                groupHeader = h.match(re);
+
+                if(groupHeader) {
+                    var group = {};
+
+                    group.id = decodeURIComponent(groupHeader[0].replace('X-Account-Group-', '')).toLowerCase();
+                    group.name = group.id;
+                    var uuids = jqXHR.getResponseHeader(groupHeader[0]);
+
+                    if(uuids === '~'){
+                        return ;
+                    }
+
+                    if(uuids) {
+                        group.users = uuids.split(',');
+                    }
+                    else {
+                        group.users = [];
+                    }
+
+                    groups.push(group);
+                }
+            });
+
+            jsonPayload.groups = groups;
+        }
+
+        return jsonPayload;
+    },
+```
+
+---
+
+## Ember-cli
+
+> A tool for creating ember apps
+
+```bash
+# Installation
+$ npm install -g ember-cli  
+
+# Start a new project
+$ ember new foo
+
+# Run server
+$ ember serve
+
+# Generate new route
+$ ember generate route bar
+```
+
+
+--- 
+
+## Design
+
+- Foundation zurb framework
+- No designer 
+- Concepts: UX principles, Simple intuitive design, error handling
+
+---
+
+## Pending issues
+
+- Responsive Design (work on tablets and smartphones). (style+performance)
+- Write tests
+- Issues: https://github.com/olgabrani/synnefo/issues
+- More user testing ( https://phab.dev.grnet.gr/T149 ) (open for review, your comments are valuable)
+
+---
+
+## FUTURE PLANS
+
+- Handle files (video players, audio players).
+- Various enhancements (github issues tagged with #enhancement).
+- Node webkit (??)
+- Global styleguide for GRNET projects
+
+---
+
+# Demo
