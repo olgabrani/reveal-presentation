@@ -1,0 +1,69 @@
+/**
+ * Synnefo theme for reveal.js.
+ *
+ */
+
+
+// Default mixins and settings -----------------
+@import "../template/mixins";
+@import "../template/settings";
+// ---------------------------------------------
+
+
+
+// Include theme-specific fonts
+@import url(https://fonts.googleapis.com/css?family=Lato:400,300,700,400italic);
+@import url(https://fonts.googleapis.com/css?family=Quicksand:400,700,400italic,700italic);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
+
+$primaryColor: #00a551;
+
+// Override theme settings (see ../template/settings.scss)
+$mainColor: #222;
+$blockMargin: 40px;
+$headingFont: 'Open Sans', sans-serif;
+$headingColor: $primaryColor;
+$headingFontWeight: bold;
+$headingTextShadow: none;
+$backgroundColor: #e6e7e8;
+$linkColor: #3b759e;
+$linkColorHover: lighten( $linkColor, 20% );
+$selectionBackgroundColor: #134674;
+$heading1Size: 2.5em;
+$heading2Size: 1.6em;
+$heading3Size: 1.35em;
+$heading4Size: 1.00em;
+
+
+
+// Fix links so they are not cut off
+.reveal a {
+	line-height: 1.3em;
+}
+
+.reveal .progress {
+    span {
+        background: $primaryColor !important;
+    }
+}
+
+.reveal section img.ember {
+    position: absolute;
+    left: -200px;
+    top: -100px;
+    background: transparent;
+    border: 0 none;
+    box-shadow: none;
+    max-width: 200px;
+}
+
+
+
+// Theme template ------------------------------
+@import "../template/theme";
+// ---------------------------------------------
+
+.reveal .slide-background.ember {
+    background: url('../../images/ember_logo.png') no-repeat 20px 20px $backgroundColor;
+    background-size: 200px 200px;
+}
