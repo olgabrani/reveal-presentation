@@ -712,13 +712,15 @@
 			backgroundColor: slide.getAttribute( 'data-background-color' ),
 			backgroundRepeat: slide.getAttribute( 'data-background-repeat' ),
 			backgroundPosition: slide.getAttribute( 'data-background-position' ),
-			backgroundTransition: slide.getAttribute( 'data-background-transition' )
+			backgroundTransition: slide.getAttribute( 'data-background-transition' ),
+      backgroundClass: slide.getAttribute( 'data-background-class' )
 		};
 
 		var element = document.createElement( 'div' );
 
 		// Carry over custom classes from the slide to the background
-		element.className = 'slide-background ' + slide.className.replace( /present|past|future/, '' );
+		var clsName =  'slide-background ' + slide.className.replace( /present|past|future/, '' );
+    element.className = clsName;
 
 		if( data.background ) {
 			// Auto-wrap image urls in url(...)
@@ -740,10 +742,12 @@
 															data.backgroundVideo +
 															data.backgroundIframe +
 															data.backgroundColor +
+                              data.backgroundClass +
 															data.backgroundRepeat +
 															data.backgroundPosition +
 															data.backgroundTransition );
 		}
+    if( data.backgroundClass ) element.className =  clsName + ' ' + data.backgroundClass;
 
 		// Additional and optional background properties
 		if( data.backgroundSize ) element.style.backgroundSize = data.backgroundSize;
