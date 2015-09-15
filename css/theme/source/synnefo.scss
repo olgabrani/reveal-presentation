@@ -26,8 +26,8 @@ $headingColor: $primaryColor;
 $headingFontWeight: bold;
 $headingTextShadow: none;
 $backgroundColor: #e6e7e8;
-$linkColor: #3b759e;
-$linkColorHover: lighten( $linkColor, 20% );
+$linkColor: #006733;
+$linkColorHover: #97b314;
 $selectionBackgroundColor: #134674;
 $heading1Size: 2.5em;
 $heading2Size: 1.6em;
@@ -41,22 +41,6 @@ $heading4Size: 1.00em;
 	line-height: 1.3em;
 }
 
-.reveal .progress {
-    span {
-        background: $primaryColor !important;
-    }
-}
-
-.reveal section img.ember {
-    position: absolute;
-    left: -200px;
-    top: -100px;
-    background: transparent;
-    border: 0 none;
-    box-shadow: none;
-    max-width: 200px;
-}
-
 
 
 // Theme template ------------------------------
@@ -66,4 +50,16 @@ $heading4Size: 1.00em;
 .reveal .slide-background.ember {
     background: url('../../images/ember_logo.png') no-repeat 20px 20px $backgroundColor;
     background-size: 200px 200px;
+    transition: none;
 }
+.reveal .progress {
+    span {
+        background: $primaryColor;
+    }
+}
+
+.reveal blockquote {
+    padding: 0 20px;
+    background: lighten($backgroundColor, 5%);
+}
+
