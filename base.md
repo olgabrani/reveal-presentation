@@ -62,7 +62,6 @@
 * bower
 * compass
 * broccoli
-* watchman
 * Ember chrome inspector
 * babel
 * Ember cli
@@ -96,8 +95,13 @@
 #### Templates
 
 ```handlebars
+<ul>
+    {{#each person in people}}
+        {{person.name}}
+    {{/each}}
+</ul>
+{{#if admin}}Yes, master.{{/if}}
 <div>
-    <label>Name:</label>
     {{input type="text" value=name placeholder="Enter your name"}}
 </div>
 <div class="text">
@@ -113,19 +117,127 @@
 #### Components
 
 ```javascript
-App.GravatarImageComponent = Ember.Component.extend({
-  size: 200,
+// components/gravatar-image.js
+export default Ember.Component.extend({
   email: '',
 
-  gravatarUrl: Ember.computed('email', 'size', function() {
-    var email = this.get('email'),
-        size = this.get('size');
-
-    return 'http://www.gravatar.com/avatar/' + md5(email) + '?s=' + size;
+  gravatarUrl: Ember.computed('email', function() {
+    var email = this.get('email');
+    return 'http://www.gravatar.com/avatar/' + md5(email) + '?s=200';
   })
 });
 ```
 
+```handlebars
+<!-- application.hbs -->
+{{gravatar-image email="foo"}}
+```
+
+```handlebars
+<!-- templates/components/gravatar-image.hbs -->
+<img src={{gravatarUrl}}>
+```
+
+
+---
+<!-- .slide: data-background-class="ember" -->
+
+## EMBER.JS 
+
+#### Controllers
+
+```javascript
+// controllers/application.js
+export default Ember.Controller.extend({
+  search: '',
+
+  actions: {
+    query() {
+      // the current value of the text field
+      var query = this.get('search');
+      this.transitionToRoute('search', { query });
+    }
+  }
+});
+```
+---
+<!-- .slide: data-background-class="ember" -->
+
+## EMBER.JS 
+
+#### Models
+
+
+```javascript
+// models/container.js
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  project: DS.belongsTo('project', {async:true}),
+  objects: DS.hasMany('object', {async:true}),
+  bytes: DS.attr('number', {defaultValue: 0}),
+  last_modified: DS.attr('date'),
+  versioning: DS.attr('string'),
+
+  last_modified_human: function(){
+    return timeHuman(this.get('last_modified'));
+  }.property('last_modified'),
+
+  isTrash: function(){
+    return this.get('name').toLowerCase() == 'trash';
+  }.property('name'),
+});
+```
+---
+<!-- .slide: data-background-class="ember" -->
+
+## EMBER.JS 
+
+#### Routes
+
+```javascript
+// routes/account.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model: function(){
+    return this.store.find('account');
+  },
+});
+```
+
+
+---
+<!-- .slide: data-background-class="ember" -->
+
+## EMBER.JS 
+
+#### The router
+
+
+```javascript
+// router.js
+Router.map(function() {
+  this.resource('index', {path: '/'});
+  this.resource('containers');
+
+  this.resource('account', {path: '/shared/accounts'}, function() {
+    this.route('container', {path: '/:account'}, function() {
+      this.route('objects', {path: '/:container_name/*path'});
+      // *path wont match an initial url with no path set 
+      this.route('objects_redirect', {path: '/:container_name'});
+    });
+  });
+
+  this.resource('container', { path: '/containers/:container_name'}, function(){
+    this.resource('objects', { path: '/*current_path'}, function(){
+      this.resource('object', { overrideNameAssertion: true }, function(){
+        this.route('versions');
+      });
+    });
+  });
+  this.resource('errors/404', {path: '*path'});
+});
+```
 ---
 
 ## Development needs
@@ -140,6 +252,39 @@ App.GravatarImageComponent = Ember.Component.extend({
 - asset pipeline (??)
 
 ---
+
+## Ember-cli
+
+> A tool for creating ember apps
+
+```bash
+# Installation
+$ npm install -g ember-cli  
+
+# Start a new project
+$ ember new demo
+
+# Run server
+$ ember serve
+
+# Generate new route
+$ ember generate route bar
+```
+
+
+--- 
+## Ember-cli
+
+### Project layout
+![ember-cli1](images/ember-cli1.png)
+
+--- 
+## Ember-cli
+
+### Project layout
+![ember-cli2](images/ember-cli2.png)
+
+--- 
 
 ## Difficulties
 
@@ -160,70 +305,41 @@ var groups = this.store.find('groups');
 
 // Pithos API way
 ajaxSuccess: function(jqXHR, jsonPayload) {
-        // get all headers as a string
-        var headersStr = jqXHR.getAllResponseHeaders();
-        var headers = headersStr.split('\n');
+    // get all headers as a string
+    var headersStr = jqXHR.getAllResponseHeaders();
+    var headers = headersStr.split('\n');
 
-        // removes the colon and the uuids of the members of each group
-        var re = (/X-Account-Group-\S*(?=:)/g);
+    // remove the colon and the uuids of the members of each group
+    var re = (/X-Account-Group-\S*(?=:)/g);
+    var groupHeader, groupName, groups=[];
 
-        var groupHeader, groupName, groups=[];
+    if(headersStr.indexOf('X-Account-Group-') > -1) {
+        headers.forEach(function(h) {
+            groupHeader = h.match(re);
 
-        if(headersStr.indexOf('X-Account-Group-') > -1) {
-            headers.forEach(function(h) {
-                groupHeader = h.match(re);
-
-                if(groupHeader) {
-                    var group = {};
-
-                    group.id = decodeURIComponent(groupHeader[0].replace('X-Account-Group-', '')).toLowerCase();
-                    group.name = group.id;
-                    var uuids = jqXHR.getResponseHeader(groupHeader[0]);
-
-                    if(uuids === '~'){
-                        return ;
-                    }
-
-                    if(uuids) {
-                        group.users = uuids.split(',');
-                    }
-                    else {
-                        group.users = [];
-                    }
-
-                    groups.push(group);
+            if(groupHeader) {
+                var group = {};
+                group.id = decodeURIComponent(groupHeader[0].replace('X-Account-Group-', ''));
+                group.name = group.id;
+                var uuids = jqXHR.getResponseHeader(groupHeader[0]);
+                if(uuids === '~') { return }
+                if(uuids) {
+                    group.users = uuids.split(',');
+                } else {
+                    group.users = [];
                 }
-            });
 
-            jsonPayload.groups = groups;
-        }
-
-        return jsonPayload;
-    },
+                groups.push(group);
+            }
+        });
+        jsonPayload.groups = groups;
+    }
+    return jsonPayload;
+},
 ```
 
 ---
 
-## Ember-cli
-
-> A tool for creating ember apps
-
-```bash
-# Installation
-$ npm install -g ember-cli  
-
-# Start a new project
-$ ember new foo
-
-# Run server
-$ ember serve
-
-# Generate new route
-$ ember generate route bar
-```
-
-
---- 
 
 ## Design
 
@@ -235,10 +351,10 @@ $ ember generate route bar
 
 ## Pending issues
 
-- Responsive Design (work on tablets and smartphones). (style+performance)
+- Responsive Design
 - Write tests
 - Issues: https://github.com/olgabrani/synnefo/issues
-- More user testing ( https://phab.dev.grnet.gr/T149 ) (open for review, your comments are valuable)
+- More user testing
 
 ---
 
@@ -247,8 +363,7 @@ $ ember generate route bar
 - Handle files (video players, audio players).
 - Various enhancements (github issues tagged with #enhancement).
 - Node webkit (??)
-- Global styleguide for GRNET projects
-
+- Global styleguide
 ---
 
 # Demo

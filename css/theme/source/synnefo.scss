@@ -63,3 +63,12 @@ $heading4Size: 1.00em;
     background: lighten($backgroundColor, 5%);
 }
 
+
+.reveal section img {
+    border: 0 none;
+    box-shadow: none;
+}
+img[alt^="ember-cli"] {
+    height: 450px;
+}
+
