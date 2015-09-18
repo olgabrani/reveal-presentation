@@ -366,4 +366,112 @@ ajaxSuccess: function(jqXHR, jsonPayload) {
 - Global styleguide
 ---
 
+# Chunked uploads
+
+```
+let transport = !!(window.ProgressEvent && 
+                   window.FileReader) && 
+                   window.FormData;
+
+let supportsChunks = Blob && 
+                     (Blob.prototype.slice ||
+                      Blob.prototype.webkitSlice || 
+                      Blob.prototype.mozSlice);
+```
+---
+
+## Pithos chunked upload
+
+The storage backend of Pithos is block oriented. The block structure of objects is exposed at the API layer, in order to
+encourage external software to implement **advanced data management operations**.
+
+**Advacned** file (*object*) upload process:
+
+- Access file
+- Read file contents
+- Split contents in chunks
+- Compute each chunk hash
+- Check for missing chunks
+- Upload missing chunks
+- Register hashmap to a path
+
+---
+
+## Pithos chunked upload
+
+- Access file
+
+    * http://www.w3.org/TR/FileAPI/
+    * Includes readonly informational attributes about a file such as its 
+      name and the date of the last modification (on disk) of the file.
+
+- Read file contents
+  
+    * http://www.w3.org/TR/FileAPI/#dfn-filereader
+    * Provides methods to read a File or a Blob, and an event model to obtain
+      the results of these reads
+
+---
+
+## Pithos chunked upload
+
+- Split in chunks
+
+    * http://www.w3.org/TR/FileAPI/#slice-method-algo
+    * returns a new Blob object with bytes
+
+- Compute chunk hash
+    
+    * https://github.com/vibornoff/asmcrypto.js/
+    * http://www.w3.org/TR/workers/
+
+
+---
+
+## Pithos chunked upload
+
+- Upload missing chunks
+   
+   * http://www.html5rocks.com/en/tutorials/file/xhr2/
+   * XHR/ArrayBuffer support
+
+- Register hashmap to a path (**object**)
+
+    * Plain old XHR
+
+---
+
+## Use of promises
+
+```
+handleAddFile (file) {
+    file.status = 'Uploading...';
+
+    resolveFile(file)               // check if file exists
+    .then(sliceFile)                // prepare sliced buffers 
+    .then(computeHashes)            // in parallel using webworkers
+    .then(resolveMissingChunks)     // ask pithos for missing chunks
+    .then(uploadMissingChunks)      // upload missing chunks
+    .then(uploadFile)               // create/replace path hashmap
+    .then(() => { file.state = 'Uploaded'; })
+    .catch((err) => { file.state = err });
+}
+```
+---
+
+## Graceful degradation
+
+- No slice/workers support ?
+
+    - Fallback to `XHR file`/`FormData`
+
+- No `FormData` support ?
+
+    - Fallback to IFrame upload
+
+- No `IFrame` support ?
+
+    - Fallback to legacy html form post method (*not implemented*)
+
+---
 # Demo
